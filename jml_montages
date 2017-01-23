@@ -1,0 +1,4 @@
+sudo fsck /mnt/hdb7
+mount /mnt/hdb7
+sudo fsck /mnt/hdb8
+mount /mnt/hdb8

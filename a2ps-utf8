@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Imprime avec a2ps un fichier UTF-8
+
+# On recherche tous les arguments passes au programme. Si c'est des arguments 
+# (avec un - en tete), on les passe a a2ps directement.
+
+# Si il n'y a pas de - en tete, on suppose qu'il s'agit de fichiers : il faut
+# changer pour chaque fichier le footer de a2ps
+
+ARGUMENT=""
+lIstefich=""
+nbopt=0
+nbfile=0
+while [ "$#" -gt "0" ]
+do
+  if [ "${1:0:1}" == "-" ]; then
+    ARGUMENT="$ARGUMENT $1"
+  else
+    listefich[$nbfile]="$1"
+    nbfile=$(($nbfile+1))
+  fi
+  nbopt=$(($nbopt+1))
+  shift
+done
+
+echo "argument: $ARGUMENT"
+echo "nbfile: ${#listefich[*]}"
+
+# OK Maintenant on sait les fichiers a imprimer
+
+# Nombre d'elements du tableau LISTEFICH
+nbfile=${#listefich[*]}
+for (( i=0 ; $i<$nbfile ; i=$i+1 )) ; do
+  file=${listefich[$i]}
+  TMP=`mktemp -d /tmp/doma2ps.XXXXXXXXXX`
+  tmpfile="$TMP/`basename "$file"`"
+  # iconv -f UTF-8 -t latin1 "$file" > "$tmpfile" 
+  cp "$file" "$tmpfile" 
+  recode UTF-8..Latin-1 "$tmpfile" 
+  a2ps -X latin1 --footer="$file" $ARGUMENT "$tmpfile"
+  rm "$tmpfile"
+  rmdir "$TMP"
+done
